@@ -10,6 +10,37 @@ Sale sales[MAX_SIZE];
 int saleCount = 0;
 
 // ==========================================
+// ВИРІВНЮВАННЯ ТАБЛИЦЬ (Вирішення проблеми з українськими літерами)
+// ==========================================
+
+// Рахує реальну кількість літер, а не байтів
+int GetUTF8Length(const string& str) {
+    int length = 0;
+    for (char c : str) {
+        if ((c & 0xC0) != 0x80) length++;
+    }
+    return length;
+}
+
+// Додає правильну кількість пробілів
+string AlignString(const string& str, int width) {
+    int len = GetUTF8Length(str);
+    string result = str;
+    if (len < width) {
+        result.append(width - len, ' ');
+    }
+    return result;
+}
+
+// Бере першу літеру для ініціалів
+string GetFirstChar(const string& str) {
+    if (str.empty()) return "";
+    int len = 1;
+    while (len < str.length() && (str[len] & 0xC0) == 0x80) len++;
+    return str.substr(0, len);
+}
+
+// ==========================================
 // БЕЗПЕЧНИЙ ВВІД
 // ==========================================
 int SafeInputInt(const string& prompt) {
@@ -110,16 +141,16 @@ void AddProduct() {
 void ShowProducts() {
     if (productCount == 0) { cout << "Порожньо.\n"; return; }
     cout << string(80, '-') << "\n";
-    cout << "| " << left << setw(4) << "Код" 
-         << " | " << left << setw(41) << "Назва товару" 
-         << " | " << left << setw(10) << "Цiна" 
-         << " | " << left << setw(12) << "Од. вимiру" << " |\n";
+    cout << "| " << AlignString("Код", 4) 
+         << " | " << AlignString("Назва товару", 41) 
+         << " | " << AlignString("Цiна", 10) 
+         << " | " << AlignString("Од. вимiру", 12) << " |\n";
     cout << string(80, '-') << "\n";
     for (int i = 0; i < productCount; i++) {
         cout << "| " << left << setw(4) << products[i].id 
-             << " | " << left << setw(41) << products[i].name 
+             << " | " << AlignString(products[i].name, 41) 
              << " | " << left << setw(10) << products[i].price 
-             << " | " << left << setw(12) << products[i].unit << " |\n";
+             << " | " << AlignString(products[i].unit, 12) << " |\n";
     }
     cout << string(80, '-') << "\n";
 }
@@ -173,24 +204,24 @@ void AddClient() {
 void ShowClients() {
     if (clientCount == 0) { cout << "Порожньо.\n"; return; }
     cout << string(80, '-') << "\n";
-    cout << "| " << left << setw(4) << "Код" 
-         << " | " << left << setw(15) << "ПIБ" 
-         << " | " << left << setw(13) << "Телефон" 
-         << " | " << left << setw(14) << "E-mail" 
-         << " | " << left << setw(14) << "Адреса" 
-         << " | " << left << setw(1) << "V" << " |\n";
+    // Оновлена ширина: E-mail тепер 16, Адреса 12. В сумі рівно 80 символів.
+    cout << "| " << AlignString("Код", 4) 
+         << " | " << AlignString("ПIБ", 15) 
+         << " | " << AlignString("Телефон", 13) 
+         << " | " << AlignString("E-mail", 16) 
+         << " | " << AlignString("Адреса", 12) 
+         << " | " << AlignString("V", 1) << " |\n";
     cout << string(80, '-') << "\n";
     for (int i = 0; i < clientCount; i++) {
         string pib = string(clients[i].lastName);
-        if (strlen(clients[i].firstName) > 0) pib += " " + string(1, clients[i].firstName[0]) + ".";
-        if (strlen(clients[i].patronymic) > 0) pib += string(1, clients[i].patronymic[0]) + ".";
-        if (pib.length() > 15) pib = pib.substr(0, 14); // Захист рамки
+        if (strlen(clients[i].firstName) > 0) pib += " " + GetFirstChar(clients[i].firstName) + ".";
+        if (strlen(clients[i].patronymic) > 0) pib += GetFirstChar(clients[i].patronymic) + ".";
 
         cout << "| " << left << setw(4) << clients[i].id 
-             << " | " << left << setw(15) << pib 
-             << " | " << left << setw(13) << clients[i].phone 
-             << " | " << left << setw(14) << clients[i].email 
-             << " | " << left << setw(14) << clients[i].address 
+             << " | " << AlignString(pib, 15) 
+             << " | " << AlignString(clients[i].phone, 13) 
+             << " | " << AlignString(clients[i].email, 16) 
+             << " | " << AlignString(clients[i].address, 12) 
              << " | " << left << setw(1) << (clients[i].isVip ? "1" : "0") << " |\n";
     }
     cout << string(80, '-') << "\n";
@@ -237,7 +268,6 @@ void AddSale() {
     SafeInputString("Дата доставки: ", s.deliveryDate, 15);
     s.quantity = SafeInputInt("Кiлькiсть: ");
 
-    // ЛОГІКА ІНТЕРНЕТ-МАГАЗИНУ (Знижки 2% та VIP-статус > 5000 грн)
     float price = 0;
     for (int i = 0; i < productCount; i++) {
         if (products[i].id == s.productId) { price = products[i].price; break; }
@@ -272,19 +302,19 @@ void AddSale() {
 void ShowSales() {
     if (saleCount == 0) { cout << "Порожньо.\n"; return; }
     cout << string(80, '-') << "\n";
-    cout << "| " << left << setw(8) << "Код Прод" 
-         << " | " << left << setw(8) << "Код Тов." 
-         << " | " << left << setw(8) << "Код Кл." 
-         << " | " << left << setw(14) << "Дата продажу" 
-         << " | " << left << setw(14) << "Дата доставки" 
-         << " | " << left << setw(9) << "Кiлькiсть" << " |\n";
+    cout << "| " << AlignString("Код Прод", 8) 
+         << " | " << AlignString("Код Тов.", 8) 
+         << " | " << AlignString("Код Кл.", 8) 
+         << " | " << AlignString("Дата продажу", 14) 
+         << " | " << AlignString("Дата доставки", 14) 
+         << " | " << AlignString("Кiлькiсть", 9) << " |\n";
     cout << string(80, '-') << "\n";
     for (int i = 0; i < saleCount; i++) {
         cout << "| " << left << setw(8) << sales[i].id 
              << " | " << left << setw(8) << sales[i].productId 
              << " | " << left << setw(8) << sales[i].clientId 
-             << " | " << left << setw(14) << sales[i].saleDate 
-             << " | " << left << setw(14) << sales[i].deliveryDate 
+             << " | " << AlignString(sales[i].saleDate, 14) 
+             << " | " << AlignString(sales[i].deliveryDate, 14) 
              << " | " << left << setw(9) << sales[i].quantity << " |\n";
     }
     cout << string(80, '-') << "\n";
