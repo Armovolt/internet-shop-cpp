@@ -55,6 +55,9 @@ void SaleMenu();
 // Функції для Товарів
 void AddProduct();
 void ShowProducts();
+void ShapkaProducts(); // Окрема функція шапки
+void EditProduct();    // Редагування
+void SortProducts();   // Сортування
 void SaveProductsTXT();
 void SaveProductsBIN();
 void LoadProductsBIN();
@@ -62,6 +65,9 @@ void LoadProductsBIN();
 // Функції для Клієнтів
 void AddClient();
 void ShowClients();
+void ShapkaClients();  // Окрема функція шапки
+void EditClient();     // Редагування
+void SortClients();    // Сортування
 void SaveClientsTXT();
 void SaveClientsBIN();
 void LoadClientsBIN();
@@ -69,6 +75,9 @@ void LoadClientsBIN();
 // Функції для Продажів
 void AddSale();
 void ShowSales();
+void ShapkaSales();    // Окрема функція шапки
+void EditSale();       // Редагування
+void SortSales();      // Сортування
 void SaveSalesTXT();
 void SaveSalesBIN();
 void LoadSalesBIN();
@@ -77,5 +86,8 @@ void LoadSalesBIN();
 int SafeInputInt(const string& prompt);
 float SafeInputFloat(const string& prompt);
 void SafeInputString(const string& prompt, char* buffer, int maxSize);
+int GetUTF8Length(const string& str);
+string AlignString(const string& str, int width);
+string GetFirstChar(const string& str);
 
 #endif

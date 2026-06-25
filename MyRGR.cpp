@@ -10,10 +10,8 @@ Sale sales[MAX_SIZE];
 int saleCount = 0;
 
 // ==========================================
-// ВИРІВНЮВАННЯ ТАБЛИЦЬ (Вирішення проблеми з українськими літерами)
+// ВИРІВНЮВАННЯ ТАБЛИЦЬ
 // ==========================================
-
-// Рахує реальну кількість літер, а не байтів
 int GetUTF8Length(const string& str) {
     int length = 0;
     for (char c : str) {
@@ -22,17 +20,13 @@ int GetUTF8Length(const string& str) {
     return length;
 }
 
-// Додає правильну кількість пробілів
 string AlignString(const string& str, int width) {
     int len = GetUTF8Length(str);
     string result = str;
-    if (len < width) {
-        result.append(width - len, ' ');
-    }
+    if (len < width) result.append(width - len, ' ');
     return result;
 }
 
-// Бере першу літеру для ініціалів
 string GetFirstChar(const string& str) {
     if (str.empty()) return "";
     int len = 1;
@@ -91,10 +85,7 @@ void MainMenu() {
         cout << "\n=========================================\n";
         cout << " IНТЕРНЕТ-МАГАЗИН (Головне меню)\n";
         cout << "=========================================\n";
-        cout << "1. Товари\n";
-        cout << "2. Клiєнти\n";
-        cout << "3. Продажi\n";
-        cout << "0. Вихiд\n";
+        cout << "1. Товари\n2. Клiєнти\n3. Продажi\n0. Вихiд\n";
         cout << "=========================================\n";
         choice = SafeInputInt("Ваш вибiр: ");
 
@@ -115,14 +106,16 @@ void ProductMenu() {
     int choice;
     do {
         cout << "\n--- ТОВАРИ ---\n";
-        cout << "1. Додати товар\n2. Вивести товари\n3. Зберегти (TXT)\n4. Зберегти (BIN)\n5. Завантажити (BIN)\n0. Назад\n";
+        cout << "1. Додати товар\n2. Вивести товари\n3. Редагувати\n4. Сортувати\n5. Зберегти (TXT)\n6. Зберегти (BIN)\n7. Завантажити (BIN)\n0. Назад\n";
         choice = SafeInputInt("Вибiр: ");
         switch (choice) {
             case 1: AddProduct(); break;
             case 2: ShowProducts(); break;
-            case 3: SaveProductsTXT(); break;
-            case 4: SaveProductsBIN(); break;
-            case 5: LoadProductsBIN(); break;
+            case 3: EditProduct(); break;
+            case 4: SortProducts(); break;
+            case 5: SaveProductsTXT(); break;
+            case 6: SaveProductsBIN(); break;
+            case 7: LoadProductsBIN(); break;
         }
     } while (choice != 0);
 }
@@ -138,14 +131,18 @@ void AddProduct() {
     cout << "Товар додано!\n";
 }
 
-void ShowProducts() {
-    if (productCount == 0) { cout << "Порожньо.\n"; return; }
+void ShapkaProducts() {
     cout << string(80, '-') << "\n";
     cout << "| " << AlignString("Код", 4) 
          << " | " << AlignString("Назва товару", 41) 
          << " | " << AlignString("Цiна", 10) 
          << " | " << AlignString("Од. вимiру", 12) << " |\n";
     cout << string(80, '-') << "\n";
+}
+
+void ShowProducts() {
+    if (productCount == 0) { cout << "Порожньо.\n"; return; }
+    ShapkaProducts();
     for (int i = 0; i < productCount; i++) {
         cout << "| " << left << setw(4) << products[i].id 
              << " | " << AlignString(products[i].name, 41) 
@@ -153,6 +150,34 @@ void ShowProducts() {
              << " | " << AlignString(products[i].unit, 12) << " |\n";
     }
     cout << string(80, '-') << "\n";
+}
+
+void EditProduct() {
+    int id = SafeInputInt("Введiть код товару для редагування: ");
+    for(int i=0; i<productCount; i++) {
+        if(products[i].id == id) {
+            cout << "Вводьте новi данi:\n";
+            SafeInputString("Назва: ", products[i].name, 50);
+            products[i].price = SafeInputFloat("Цiна: ");
+            SafeInputString("Одиниця вимiру: ", products[i].unit, 20);
+            cout << "Товар оновлено!\n";
+            return;
+        }
+    }
+    cout << "Товар з таким кодом не знайдено.\n";
+}
+
+void SortProducts() {
+    for(int i=0; i<productCount-1; i++) {
+        for(int j=0; j<productCount-i-1; j++) {
+            if(products[j].id > products[j+1].id) {
+                Product temp = products[j];
+                products[j] = products[j+1];
+                products[j+1] = temp;
+            }
+        }
+    }
+    cout << "Товари вiдсортовано за кодом!\n";
 }
 
 void SaveProductsTXT() {
@@ -174,14 +199,16 @@ void ClientMenu() {
     int choice;
     do {
         cout << "\n--- КЛIЄНТИ ---\n";
-        cout << "1. Додати клiєнта\n2. Вивести клiєнтiв\n3. Зберегти (TXT)\n4. Зберегти (BIN)\n5. Завантажити (BIN)\n0. Назад\n";
+        cout << "1. Додати клiєнта\n2. Вивести клiєнтiв\n3. Редагувати\n4. Сортувати\n5. Зберегти (TXT)\n6. Зберегти (BIN)\n7. Завантажити (BIN)\n0. Назад\n";
         choice = SafeInputInt("Вибiр: ");
         switch (choice) {
             case 1: AddClient(); break;
             case 2: ShowClients(); break;
-            case 3: SaveClientsTXT(); break;
-            case 4: SaveClientsBIN(); break;
-            case 5: LoadClientsBIN(); break;
+            case 3: EditClient(); break;
+            case 4: SortClients(); break;
+            case 5: SaveClientsTXT(); break;
+            case 6: SaveClientsBIN(); break;
+            case 7: LoadClientsBIN(); break;
         }
     } while (choice != 0);
 }
@@ -201,10 +228,8 @@ void AddClient() {
     cout << "Клiєнта додано!\n";
 }
 
-void ShowClients() {
-    if (clientCount == 0) { cout << "Порожньо.\n"; return; }
+void ShapkaClients() {
     cout << string(80, '-') << "\n";
-    // Оновлена ширина: E-mail тепер 16, Адреса 12. В сумі рівно 80 символів.
     cout << "| " << AlignString("Код", 4) 
          << " | " << AlignString("ПIБ", 15) 
          << " | " << AlignString("Телефон", 13) 
@@ -212,6 +237,11 @@ void ShowClients() {
          << " | " << AlignString("Адреса", 12) 
          << " | " << AlignString("V", 1) << " |\n";
     cout << string(80, '-') << "\n";
+}
+
+void ShowClients() {
+    if (clientCount == 0) { cout << "Порожньо.\n"; return; }
+    ShapkaClients();
     for (int i = 0; i < clientCount; i++) {
         string pib = string(clients[i].lastName);
         if (strlen(clients[i].firstName) > 0) pib += " " + GetFirstChar(clients[i].firstName) + ".";
@@ -227,6 +257,38 @@ void ShowClients() {
     cout << string(80, '-') << "\n";
 }
 
+void EditClient() {
+    int id = SafeInputInt("Введiть код клiєнта для редагування: ");
+    for(int i=0; i<clientCount; i++) {
+        if(clients[i].id == id) {
+            cout << "Вводьте новi данi:\n";
+            SafeInputString("Прiзвище: ", clients[i].lastName, 30);
+            SafeInputString("Iм'я: ", clients[i].firstName, 30);
+            SafeInputString("По батьковi: ", clients[i].patronymic, 30);
+            SafeInputString("Адреса: ", clients[i].address, 50);
+            SafeInputString("Телефон: ", clients[i].phone, 20);
+            SafeInputString("E-mail: ", clients[i].email, 40);
+            clients[i].isVip = SafeInputInt("Постiйний клiєнт? (1-Так, 0-Нi): ");
+            cout << "Клiєнта оновлено!\n";
+            return;
+        }
+    }
+    cout << "Клiєнта з таким кодом не знайдено.\n";
+}
+
+void SortClients() {
+    for(int i=0; i<clientCount-1; i++) {
+        for(int j=0; j<clientCount-i-1; j++) {
+            if(clients[j].id > clients[j+1].id) {
+                Client temp = clients[j];
+                clients[j] = clients[j+1];
+                clients[j+1] = temp;
+            }
+        }
+    }
+    cout << "Клiєнтiв вiдсортовано за кодом!\n";
+}
+
 void SaveClientsTXT() {
     ofstream f("Clients.txt");
     for (int i=0; i<clientCount; i++) f << clients[i].id << "|" << clients[i].lastName << "|" << clients[i].phone << "\n";
@@ -240,20 +302,22 @@ void LoadClientsBIN() {
 }
 
 // ==========================================
-// 3. ПРОДАЖІ ТА ЛОГІКА ЗНИЖОК
+// 3. ПРОДАЖІ
 // ==========================================
 void SaleMenu() {
     int choice;
     do {
         cout << "\n--- ПРОДАЖI ---\n";
-        cout << "1. Додати продаж\n2. Вивести продажi\n3. Зберегти (TXT)\n4. Зберегти (BIN)\n5. Завантажити (BIN)\n0. Назад\n";
+        cout << "1. Додати продаж\n2. Вивести продажi\n3. Редагувати\n4. Сортувати\n5. Зберегти (TXT)\n6. Зберегти (BIN)\n7. Завантажити (BIN)\n0. Назад\n";
         choice = SafeInputInt("Вибiр: ");
         switch (choice) {
             case 1: AddSale(); break;
             case 2: ShowSales(); break;
-            case 3: SaveSalesTXT(); break;
-            case 4: SaveSalesBIN(); break;
-            case 5: LoadSalesBIN(); break;
+            case 3: EditSale(); break;
+            case 4: SortSales(); break;
+            case 5: SaveSalesTXT(); break;
+            case 6: SaveSalesBIN(); break;
+            case 7: LoadSalesBIN(); break;
         }
     } while (choice != 0);
 }
@@ -282,7 +346,7 @@ void AddSale() {
         float totalSum = price * s.quantity;
         
         if (clients[clientIndex].isVip == 1) {
-            totalSum = totalSum * 0.98; // Знижка 2%
+            totalSum = totalSum * 0.98; 
             cout << "\n*** Застосовано знижку 2%! Сума до оплати: " << totalSum << " грн ***\n";
         } else {
             cout << "\n*** Сума до оплати: " << totalSum << " грн ***\n";
@@ -299,8 +363,7 @@ void AddSale() {
     cout << "Продаж успiшно зафiксовано!\n";
 }
 
-void ShowSales() {
-    if (saleCount == 0) { cout << "Порожньо.\n"; return; }
+void ShapkaSales() {
     cout << string(80, '-') << "\n";
     cout << "| " << AlignString("Код Прод", 8) 
          << " | " << AlignString("Код Тов.", 8) 
@@ -309,6 +372,11 @@ void ShowSales() {
          << " | " << AlignString("Дата доставки", 14) 
          << " | " << AlignString("Кiлькiсть", 9) << " |\n";
     cout << string(80, '-') << "\n";
+}
+
+void ShowSales() {
+    if (saleCount == 0) { cout << "Порожньо.\n"; return; }
+    ShapkaSales();
     for (int i = 0; i < saleCount; i++) {
         cout << "| " << left << setw(8) << sales[i].id 
              << " | " << left << setw(8) << sales[i].productId 
@@ -318,6 +386,36 @@ void ShowSales() {
              << " | " << left << setw(9) << sales[i].quantity << " |\n";
     }
     cout << string(80, '-') << "\n";
+}
+
+void EditSale() {
+    int id = SafeInputInt("Введiть код продажу для редагування: ");
+    for(int i=0; i<saleCount; i++) {
+        if(sales[i].id == id) {
+            cout << "Вводьте новi данi:\n";
+            sales[i].productId = SafeInputInt("Код товару: ");
+            sales[i].clientId = SafeInputInt("Код клiєнта: ");
+            SafeInputString("Дата продажу: ", sales[i].saleDate, 15);
+            SafeInputString("Дата доставки: ", sales[i].deliveryDate, 15);
+            sales[i].quantity = SafeInputInt("Кiлькiсть: ");
+            cout << "Продаж оновлено!\n";
+            return;
+        }
+    }
+    cout << "Продаж з таким кодом не знайдено.\n";
+}
+
+void SortSales() {
+    for(int i=0; i<saleCount-1; i++) {
+        for(int j=0; j<saleCount-i-1; j++) {
+            if(sales[j].id > sales[j+1].id) {
+                Sale temp = sales[j];
+                sales[j] = sales[j+1];
+                sales[j+1] = temp;
+            }
+        }
+    }
+    cout << "Продажi вiдсортовано за кодом!\n";
 }
 
 void SaveSalesTXT() {
